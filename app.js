@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/api/';
+const API_URL = 'https://api-almacen-backend.onrender.com';
 let catalogoActual = ""; // Guardará 'conceptos', 'destinos', etc.
 
 // ==========================================
