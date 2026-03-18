@@ -19,6 +19,12 @@ function abrirCatalogo(nombreCatalogo, idVistaDestino) {
 
     if (titulo) titulo.innerText = "Catálogo de " + nombreCatalogo;
     if (formulario) formulario.reset();
+
+    if (catalogoActual === 'productos') {
+        cargarSelectoresProductos();
+    }
+
+
 }
 
 async function abrirTabla(idVista){
@@ -226,3 +232,42 @@ document.addEventListener("DOMContentLoaded", function(){
         });
     }
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+async function cargarSelectoresProductos() {
+    try {
+        // 1. Pedimos los datos al backend (hacemos dos peticiones a la vez)
+        const [resProv, resUni] = await Promise.all([
+            fetch(`${API_URL}proveedores`),
+            fetch(`${API_URL}unidades`)
+        ]);
+
+        const proveedores = await resProv.json();
+        const unidades = await resUni.json();
+
+        // 2. Apuntamos a los <select> del HTML
+        const selectProv = document.getElementById('prov');
+        const selectUni = document.getElementById('uni');
+
+        // 3. Llenamos las opciones (el 'value' guarda la clave numérica, el texto muestra la descripción)
+        selectProv.innerHTML = '<option value="">Selecciona un proveedor...</option>' + 
+            proveedores.map(p => `<option value="${p.clave}">${p.descripcion}</option>`).join('');
+
+        selectUni.innerHTML = '<option value="">Selecciona una unidad...</option>' + 
+            unidades.map(u => `<option value="${u.clave}">${u.descripcion}</option>`).join('');
+
+    } catch (error) {
+        console.error("Error cargando selectores:", error);
+    }
+}
