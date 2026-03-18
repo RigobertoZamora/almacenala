@@ -1,4 +1,4 @@
-const API_URL = 'https://api-almacen-backend.onrender.com';
+const API_URL = 'https://api-almacen-backend.onrender.com/api/';
 let catalogoActual = ""; // Guardará 'conceptos', 'destinos', etc.
 
 // ==========================================
