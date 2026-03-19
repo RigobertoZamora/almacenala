@@ -124,7 +124,7 @@ app.delete('/api/proveedores/:clave', (req, res) => {
 // --- RUTAS API: PRODUCTOS ---
 // ==========================================
 app.get('/api/productos', (req, res) => {
-    db.query('SELECT Productos.clave, Productos.descripcion, UnidadesMedida.descripcion, Proveedor.descripcion, Productos.precioUnitario FROM Productos INNER JOIN Proveedor ON Productos.idProveedor = Proveedor.idProveedor INNER JOIN UnidadesMedida ON Productos.idUnidadMedida = UnidadesMedida.idUnidadMedida', (err, results) => {
+    db.query('SELECT Productos.clave, Productos.descripcion, UnidadesMedida.descripcion AS unidades, Proveedores.descripcion AS proveedor, Productos.precioUnitario AS precio FROM Productos INNER JOIN Proveedores ON Productos.idProveedor = Proveedores.idProveedor INNER JOIN UnidadesMedida ON Productos.idUnidadMedida = UnidadesMedida.idUnidadMedida', (err, results) => {
         if (err) return res.status(500).send(err);
         res.json(results);
     });
