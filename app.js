@@ -302,10 +302,10 @@ async function cargarSelectoresProductos() {
 
         // 3. Llenamos las opciones (el 'value' guarda la clave numérica, el texto muestra la descripción)
         selectProv.innerHTML = '<option value="">Selecciona un proveedor...</option>' + 
-            proveedores.map(p => `<option value="${p.clave}">${p.descripcion}</option>`).join('');
+            proveedores.map(p => `<option value="${p.id}">${p.descripcion}</option>`).join('');
 
         selectUni.innerHTML = '<option value="">Selecciona una unidad...</option>' + 
-            unidades.map(u => `<option value="${u.clave}">${u.descripcion}</option>`).join('');
+            unidades.map(u => `<option value="${u.id}">${u.descripcion}</option>`).join('');
 
     } catch (error) {
         console.error("Error cargando selectores:", error);
