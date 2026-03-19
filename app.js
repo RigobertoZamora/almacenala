@@ -121,9 +121,9 @@ document.querySelectorAll('.formCatalogo').forEach(formulario => {
             rfc: e.target.querySelector('#rfc')?.value,
             telefono: e.target.querySelector('#tel')?.value,
             correo: e.target.querySelector('#correo')?.value,
-            unidades: e.target.querySelector('#uni')?.value,
-            proveedor: e.target.querySelector('#prov')?.value,
-            precio: e.target.querySelector('#precio')?.value
+            unidades: parseInt(e.target.querySelector('#uni')?.value),
+            proveedor: parseInt(e.target.querySelector('#prov')?.value),
+            precio: parseFloat(e.target.querySelector('#precio')?.value)
         };
 
         const URL_DINAMICA = `${API_URL}${catalogoActual}`;
