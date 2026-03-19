@@ -67,6 +67,14 @@ async function abrirTabla(idVista){
                 filasHTML += `<td>${item.rfc || '-'}</td>`;
             }
 
+            if (nombreTabla === 'proveedores') {
+                filasHTML += `<td>${item.telefono || '-'}</td>`;
+            }
+
+            if (nombreTabla === 'proveedores') {
+                filasHTML += `<td>${item.correo || '-'}</td>`;
+            }
+
             // Agregamos el botón de eliminar al final
             filasHTML += `
             <td>
