@@ -60,7 +60,7 @@ async function abrirTabla(idVista){
             
             // Si es productos, añadimos las columnas extra
             if (nombreTabla === 'productos') {
-                filasHTML += `<td>${item.unidades || '-'}</td><td>$${item.precio || '0.00'}</td>`;
+                filasHTML += `<td>${item.unidades || '-'}</td><td>${item.proveedor || '-'}</td><td>$${item.precio || '0.00'}</td>`;
             }
             // Si es proveedores, añadimos las columnas extra
             if (nombreTabla === 'proveedores') {
@@ -129,6 +129,7 @@ document.querySelectorAll('.formCatalogo').forEach(formulario => {
         const URL_DINAMICA = `${API_URL}${catalogoActual}`;
 
         try {
+            console.log(datos);
             await fetch(URL_DINAMICA, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
