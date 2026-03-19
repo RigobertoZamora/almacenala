@@ -1,3 +1,4 @@
+
 const API_URL = 'https://api-almacen-backend.onrender.com/api/';
 let catalogoActual = ""; // Guardará 'conceptos', 'destinos', etc.
 
@@ -23,8 +24,6 @@ function abrirCatalogo(nombreCatalogo, idVistaDestino) {
     if (catalogoActual === 'productos') {
         cargarSelectoresProductos();
     }
-
-
 }
 
 async function abrirTabla(idVista){
@@ -137,6 +136,9 @@ document.querySelectorAll('.formCatalogo').forEach(formulario => {
     });
 });
 
+//-------------------------------------------------------------------
+
+
 // ==========================================
 // 3. LÓGICA DE DOCUMENTOS Y MOVIMIENTOS
 // ==========================================
@@ -149,9 +151,39 @@ function abrirDocumento(tipo) {
     document.getElementById('titulo-doc').innerText = "Documento de " + tipo;
     document.getElementById('doc-tipo').value = tipo;
     document.getElementById('lbl-entidad').innerText = (tipo === 'Entrada') ? "Proveedor" : "Destino";
+    // ---Cargar los datos de la base de datos ---
+    if (tipo === 'Entrada') {
+        cargarSelect('proveedores', 'doc-entidad');
+    } else {
+        cargarSelect('destinos', 'doc-entidad');
+    }
+    cargarSelect('conceptos', 'doc-concepto');
     actualizarTabla();
     navegar('vista-documentos');
 }
+
+async function cargarSelect(tabla, idSelect) {
+    const select = document.getElementById(idSelect); 
+    // Ponemos un mensaje de carga
+    select.innerHTML = '<option value="">Cargando...</option>';
+    try {
+        const response = await fetch(`${API_URL}${tabla}`);
+        const datos = await response.json();
+        select.innerHTML = '<option value="">Seleccione una opción...</option>';
+        datos.forEach(item => {
+            // Usamos 'descripcion' o 'nombre' dependiendo de la tabla
+            const texto = item.descripcion || item.nombre || item.nombre_proveedor;
+            const id = item.id || item.clave;
+            select.innerHTML += `<option value="${id}">${texto}</option>`;
+        });
+    } catch (error) {
+        console.error(`Error al cargar ${tabla}:`, error);
+        select.innerHTML = '<option value="">Error al cargar datos</option>';
+    }
+}
+
+
+    // --------------------------------------------------
 
 const inPre = document.getElementById('m-precio');
 const inCan = document.getElementById('m-cant');
