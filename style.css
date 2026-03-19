@@ -1,0 +1,22 @@
+ .custom-card { border: 2px solid #333; border-radius: 40px; padding: 30px; background: white; }
+        .bg-blue { background-color: #007bff; color: white; border-radius: 15px; }
+        .seccion { display: none; }
+        .seccion.activa { display: block; }
+        .modal-content { border-radius: 30px; }
+
+        .dropdown-submenu {
+            position: relative;
+        }
+
+        .dropdown-submenu > .dropdown-menu {
+            top: 0;
+            left: 100%; 
+            margin-top: -1px;
+            display: none; /* Asegura que esté oculto por defecto */
+        }
+
+        /* El !important fuerza a Bootstrap a obedecer cuando el JS agrega la clase */
+        .dropdown-submenu > .dropdown-menu.show {
+            display: block !important; 
+            position: absolute !important;
+        }
