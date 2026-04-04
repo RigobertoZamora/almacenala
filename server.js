@@ -130,11 +130,11 @@ app.get('/api/productos', (req, res) => {
     });
 });
 app.post('/api/productos', (req, res) => {
-    const { clave, descripcion, unidades, proveedor, precio } = req.body;
+    const { clave, descripcion, existencia, unidades, proveedor, precio } = req.body;
     
     // El frontend debe enviar el ID (número), no texto.
-    const query = 'INSERT INTO Productos (clave, descripcion, idUnidadMedida, idProveedor, precioUnitario) VALUES (?, ?, ?, ?, ?)';
-    db.query(query, [clave, descripcion, unidades, proveedor, precio], (err, result) => {
+    const query = 'INSERT INTO Productos (clave, descripcion, existencia, idUnidadMedida, idProveedor, precioUnitario) VALUES (?, ?, ?, ?, ?, ?)';
+    db.query(query, [clave, descripcion, existencia, unidades, proveedor, precio], (err, result) => {
         if (err) return res.status(500).send(err);
         res.json({ mensaje: 'Producto guardado' });
     });

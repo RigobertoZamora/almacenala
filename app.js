@@ -118,6 +118,7 @@ document.querySelectorAll('.formCatalogo').forEach(formulario => {
         const datos = {
             clave: e.target.querySelector('#clave')?.value,
             descripcion: e.target.querySelector('#desc')?.value,
+            existencia: parseFloat(e.target.querySelector('#existencia')?.value) || 0,
             rfc: e.target.querySelector('#rfc')?.value,
             telefono: e.target.querySelector('#tel')?.value,
             correo: e.target.querySelector('#correo')?.value,
