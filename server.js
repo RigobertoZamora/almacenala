@@ -1,4 +1,4 @@
-require('dotenv').config();
+//require('dotenv').config();
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors'); 
@@ -11,10 +11,10 @@ app.use(cors());
 app.use(express.static(path.join(__dirname)));
 
 const db = mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: 'final_almacen',
     port: process.env.DB_PORT,
     ssl: {
         rejectUnauthorized: false

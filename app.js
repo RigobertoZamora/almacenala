@@ -1,5 +1,5 @@
 
-const API_URL = 'https://api-almacen-backend.onrender.com/api/';
+const API_URL = 'http://localhost:3000/api/'; // Cambia el puerto si tu servidor usa otro
 let catalogoActual = ""; // Guardará 'conceptos', 'destinos', etc.
 
 // ==========================================
