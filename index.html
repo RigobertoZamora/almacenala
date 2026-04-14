@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>La Gran Empresa - Dashboard Almacén</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="#" onclick="navegar('inicio')">
+                <i class="bi bi-buildings me-2"></i>LA GRAN EMPRESA
+            </a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Catálogos</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="abrirCatalogo('conceptos', 'vista-catalogos')">Conceptos</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="abrirCatalogo('destinos', 'vista-catalogos')">Destinos</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="abrirCatalogo('productos', 'vista-productos')">Productos</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="abrirCatalogo('proveedores', 'vista-proveedores')">Proveedores</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="abrirCatalogo('unidades', 'vista-catalogos')">Unidades de Medida</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Documentos</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="abrirDocumento('Entrada')">Entradas</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="abrirDocumento('Salida')">Salidas</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside">Reportes del sistema</a>
+                        <ul class="dropdown-menu">
+                            
+                            <li class="dropdown-submenu position-relative">
+                                <a class="dropdown-item dropdown-toggle" href="#">Catálogos</a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" onclick="abrirTabla('reporte-productos')">Productos</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="abrirTabla('reporte-proveedores')">Proveedores</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="abrirTabla('reporte-unidades')">Unidades de medida</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="abrirTabla('reporte-conceptos')">Conceptos</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="abrirTabla('reporte-destinos')">Destinos</a></li>
+                                </ul>
+                            </li>
+                            
+
+
+
+
+                            <li><a class="dropdown-item" href="#" onclick="reporte('documents-page')">Documentos</a></li>
+
+
+
+
+                            
+
+
+                            <li><a class="dropdown-item" href="#" onclick="reporte('documento')">Existencia de almacen</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="dropdown" >Reportes</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div id="vista-inicio" class="seccion activa text-center p-5">
+            <h1 class="display-3 fw-bold">Sistema de Almacén</h1>
+            <p class="lead">Gestione sus catálogos y documentos de inventario.</p>
+        </div>
+        
+        <div id="vista-catalogos" class="seccion">
+            <div class="custom-card shadow mx-auto" style="max-width: 600px;">
+                <h2 class="titulo-catalogo text-center mb-4">Catálogo</h2>
+                <form class="formCatalogo">
+                    <div class="mb-3">
+                        <label class="fw-bold">Clave</label>
+                        <input type="text" id="clave" class="form-control" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="fw-bold">Descripción</label>
+                        <input type="text" id="desc" class="form-control" required>
+                    </div>
+                    <div class="d-flex justify-content-center gap-3">
+                        <button type="submit" class="btn bg-blue px-4">Guardar en Catálogo</button>
+                        <button type="button" class="btn btn-secondary px-4" style="border-radius:15px" onclick="navegar('vista-inicio')">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="vista-proveedores" class="seccion">
+            <div class="custom-card shadow mx-auto" style="max-width: 600px;">
+                <h2 class="titulo-catalogo text-center mb-4">Catálogo</h2>
+                <form class="formCatalogo">
+                    <div class="mb-3">
+                        <label class="fw-bold">Clave</label>
+                        <input type="text" id="clave" class="form-control" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="fw-bold">Descripción</label>
+                        <input type="text" id="desc" class="form-control" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="fw-bold">RFC</label>
+                        <input type="text" id="rfc" class="form-control" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="fw-bold">Teléfono</label>
+                        <input type="text" id="tel" class="form-control" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="fw-bold">Correo</label>
+                        <input type="text" id="correo" class="form-control" required>
+                    </div>
+                    <div class="d-flex justify-content-center gap-3">
+                        <button type="submit" class="btn bg-blue px-4">Guardar en Catálogo</button>
+                        <button type="button" class="btn btn-secondary px-4" style="border-radius:15px" onclick="navegar('vista-inicio')">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="vista-productos" class="seccion">
+            <div class="custom-card shadow mx-auto" style="max-width: 600px;">
+                <h2 class="titulo-catalogo text-center mb-4">Catálogo</h2>
+                <form class="formCatalogo">
+                    <div class="mb-3">
+                        <label class="fw-bold">Clave</label>
+                        <input type="number" id="clave" class="form-control" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="fw-bold">Descripción</label>
+                        <input type="text" id="desc" class="form-control" required>
+                    </div>
+
+
+                    <div class="mb-4">
+                        <label class="fw-bold">Unidades</label>
+                        <select id="uni" class="form-select" required>
+                            <option value="">Cargando unidades...</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="fw-bold">Proveedor</label>
+                        <select id="prov" class="form-select" required>
+                            <option value="">Cargando proveedores...</option>
+                        </select>
+                    </div>
+
+
+
+                    <div class="mb-4">
+                        <label class="fw-bold">Precio</label>
+                        <input type="text" id="precio" class="form-control" required>
+                    </div>
+                    <div class="d-flex justify-content-center gap-3">
+                        <button type="submit" class="btn bg-blue px-4">Guardar en Catálogo</button>
+                        <button type="button" class="btn btn-secondary px-4" style="border-radius:15px" onclick="navegar('vista-inicio')">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="vista-documentos" class="seccion">
+            <div class="custom-card shadow mb-4">
+                <h3 id="titulo-doc" class="mb-4">Documento de Almacén</h3>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="fw-bold">No. Documento</label>
+                        <input type="text" id="doc-numero" class="form-control">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="fw-bold">Fecha</label>
+                        <input type="date" id="doc-fecha" class="form-control">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="fw-bold">Tipo</label>
+                        <input type="text" id="doc-tipo" class="form-control bg-light" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label id="lbl-entidad" class="fw-bold">Proveedor / Destino</label>
+                        <select id="doc-entidad" class="form-select"></select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="fw-bold">Concepto</label>
+                        <select id="doc-concepto" class="form-select"></select>
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <button class="btn bg-blue px-4" data-bs-toggle="modal" data-bs-target="#modalProd">Agregar Movimientos</button>
+                </div>
+            </div>
+
+            
+
+            <div class="custom-card shadow">
+                <h6 class="fw-bold text-center">REGISTRO DE MOVIMIENTOS</h6>
+                <table class="table table-bordered mt-3">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>No</th><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-movimientos"></tbody>
+                </table>
+                <div class="text-end pe-4">
+                    <h4 class="fw-bold">TOTAL: <span id="doc-total">$0.00</span></h4>
+                </div>
+                <div class="d-flex justify-content-center mt-4 gap-3">
+                    <button class="btn bg-blue w-50" onclick="guardarDocumentoCompleto()">Guardar Documento y Movimientos</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="reporte-conceptos" class="seccion mx-auto" style="max-width: 600px;">
+            <h6 class="fw-bold text-center mb-3">REGISTRO DE CONCEPTOS</h6>
+             <table class="table table-striped border shadow-sm text-center">
+                <thead class="table-dark">
+                    <tr><th>Clave</th><th>Descripción</th><th>Acciones</th></tr>
+                </thead>
+                <tbody id="tabla-conceptos"></tbody>
+            </table>
+        </div>
+
+        <div id="reporte-destinos" class="seccion mx-auto" style="max-width: 600px;">
+            <h6 class="fw-bold text-center mb-3">REGISTRO DE DESTINOS</h6>
+             <table class="table table-striped border shadow-sm text-center">
+                <thead class="table-dark">
+                    <tr><th>Clave</th><th>Descripción</th><th>Acciones</th></tr>
+                </thead>
+                <tbody id="tabla-destinos"></tbody>
+            </table>
+        </div>
+
+        <div id="reporte-unidades" class="seccion mx-auto" style="max-width: 600px;">
+            <h6 class="fw-bold text-center mb-3">REGISTRO DE UNIDADES DE MEDIDA</h6>
+             <table class="table table-striped border shadow-sm text-center">
+                <thead class="table-dark">
+                    <tr><th>Clave</th><th>Descripción</th><th>Acciones</th></tr>
+                </thead>
+                <tbody id="tabla-unidades"></tbody>
+            </table>
+        </div>
+
+        <div id="reporte-productos" class="seccion mx-auto" style="max-width: 800px;">
+            <h6 class="fw-bold text-center mb-3">REGISTRO DE PRODUCTOS</h6>
+             <table class="table table-striped border shadow-sm text-center">
+                <thead class="table-dark">
+                    <tr><th>Clave</th><th>Descripción</th><th>Unidad Medida</th><th>Proveedor</th><th>Precio</th><th>Acciones</th></tr>
+                </thead>
+                <tbody id="tabla-productos"></tbody>
+            </table>
+        </div>
+
+        <div id="reporte-proveedores" class="seccion mx-auto" style="max-width: 800px;">
+            <h6 class="fw-bold text-center mb-3">REGISTRO DE PROVEEDORES</h6>
+             <table class="table table-striped border shadow-sm text-center">
+                <thead class="table-dark">
+                    <tr><th>Clave</th><th>Descripción</th><th>RFC</th><th>Teléfono</th><th>Correo</th><th>Acciones</th></tr>
+                </thead>
+                <tbody id="tabla-proveedores"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalProd" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content p-4">
+                <h4 class="text-center fw-bold mb-4">AGREGAR MOVIMIENTO</h4>
+                <div class="mb-3">
+                    <label>Producto</label>
+                    <input type="text" id="m-prod" class="form-control">
+                </div>
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <label>Precio</label>
+                        <input type="number" id="m-precio" class="form-control">
+                    </div>
+                    <div class="col-6">
+                        <label>Cantidad</label>
+                        <input type="number" id="m-cant" class="form-control">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label>Subtotal</label>
+                    <input type="text" id="m-sub" class="form-control bg-light" readonly>
+                </div>
+                <div class="d-flex justify-content-center gap-2">
+                    <button class="btn bg-blue px-4" onclick="agregarMovimiento()">Aceptar</button>
+                    <button class="btn btn-secondary px-4" style="border-radius:15px" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <div id="documents-page"class="seccion">
+        <div id="mi-selector-unico">
+            <div class="tri-state-container">
+                <input type="radio" name="posicion" id="pos-entrada" >
+                <label for="pos-entrada">ENTRADA</label>
+                <input type="radio" name="posicion" id="pos-medio" checked>
+                <label for="pos-medio">AMBOS</label>
+                <input type="radio" name="posicion" id="pos-salida">
+                <label for="pos-salida">SALIDA</label>
+                <div class="barra-indicadora"></div>
+            </div>
+        </div>
+            
+        <div class="toolbar-reportes">   
+            <div class="search-box">
+                <select id="buscar-por" class="search-select">
+                    <option value="texto">DESTINO / PROVEEDORES</option>
+                    <option value="numero">NÚMERO (#)</option>
+                </select>
+                <div class="search-divider"></div>
+                <input type="text" id="input-busqueda" placeholder="Buscar..." onkeyup="ejecutarBusqueda()">
+                <i class="bi bi-search search-icon"></i>
+            </div>
+
+            <div class="orden-group">
+                <span class="label-orden">ORDENAR POR:</span>
+                <div class="botones-orden">
+                    <button class="btn-orden active" onclick="cambiarOrden('reciente', this)">MÁS RECIENTE</button>
+                    <button class="btn-orden" onclick="cambiarOrden('id', this)">NÚMERO (#)</button>
+                    <button class="btn-orden" onclick="cambiarOrden('alfabetico', this)">A-Z</button>
+                </div>
+            </div>
+        </div>
+            <div id="contenedor-bloques" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4" style="width: 90vw; margin: 0 auto;">
+            </div>
+    </div>
+
+    <div id="pdf-view-page" class="seccion" style="display: none; background: #f4f4f4; padding: 40px 0;">
+        <div class="container bg-white p-5 shadow-sm" id="area-imprimible" style="width: 210mm; min-height: 297mm; margin: 0 auto;">
+            
+            <div class="d-flex justify-content-between border-bottom border-3 pb-3 mb-4">
+                <div>
+                    <h2 class="fw-bold mb-0">LA GRAN EMPRESA</h2>
+                    <p class="text-muted small">Control de Almacén e Inventarios</p>
+                </div>
+                <div class="text-end">
+                    <h1 id="pdf-tipo" class="fw-bold mb-0"></h1> <p class="mb-0">Folio: <span id="pdf-folio" class="fw-bold"></span></p>
+                    <p class="small text-muted">Fecha: <span id="pdf-fecha"></span></p>
+                </div>
+            </div>
+            <div class="d-flex align-items-baseline gap-2 mb-3">
+                <div id="pdf-etiqueta-entidad" class="text-muted fw-bold small text-uppercase">PROVEEDOR:</div>
+                <div id="pdf-entidad" class="fw-bold fs-5"></div>
+            </div>
+            <table class="table table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Clave</th>
+                        <th>Descripción</th>
+                        <th class="text-center">Precio Unit.</th>
+                        <th class="text-center">Cant.</th>
+                        <th class="text-end">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody id="pdf-tabla-cuerpo">
+                </tbody>
+            </table>
+            <div class="d-flex justify-content-end mt-3">
+                <div class="p-2 bg-light border text-end" style="min-width: 200px;">
+                    <span class="fw-bold me-2">TOTAL:</span>
+                    <span id="pdf-total" class="fs-4 fw-bold"></span>
+                </div>
+            </div>
+            <div style="margin-top: 80px;" class="text-center">
+                <div style="border-top: 2px solid #000; width: 200px; margin: 0 auto;"></div>
+                <p class="small fw-bold mt-2">Firma de Responsable</p>
+            </div>
+        </div>
+        <div class="menu-flotante no-print">
+            <h6 class="text-center mb-3 text-muted" style="font-size: 0.85rem; letter-spacing: 1px;">ACCIONES</h6>
+            <button class="btn btn-outline-secondary w-100 text-start mb-2" onclick="regresarALista()">
+                <i class="bi bi-arrow-left me-2"></i> Volver
+            </button>
+            <button class="btn btn-dark w-100 text-start mb-2" onclick="window.print()">
+                <i class="bi bi-printer me-2"></i> Imprimir
+            </button>
+            <button id="btn-descargar-server" class="btn btn-danger w-100 text-start">
+                <i class="bi bi-file-earmark-pdf me-2"></i> Descargar PDF 
+            </button>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src="app.js"></script>
+
+</body>
+</html>
