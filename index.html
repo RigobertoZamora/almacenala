@@ -90,7 +90,7 @@
         <div id="vista-proveedores" class="seccion">
             <div class="custom-card shadow mx-auto" style="max-width: 600px;">
                 <h2 class="titulo-catalogo text-center mb-4">Catálogo</h2>
-                <form class="formCatalogo">
+                <form class="formCatalogo" data-endpoint="proveedores">
                     <div class="mb-3">
                         <label class="fw-bold">Clave</label>
                         <input type="text" id="clave" class="form-control" required>
@@ -122,7 +122,7 @@
         <div id="vista-productos" class="seccion">
             <div class="custom-card shadow mx-auto" style="max-width: 600px;">
                 <h2 class="titulo-catalogo text-center mb-4">Catálogo</h2>
-                <form class="formCatalogo">
+                <form class="formCatalogo" data-endpoint="productos">
                     <div class="mb-3">
                         <label class="fw-bold">Clave</label>
                         <input type="number" id="clave" class="form-control" required>
@@ -136,13 +136,13 @@
                     <div class="mb-4">
                         <label class="fw-bold">Unidades</label>
                         <select id="uni" class="form-select" required>
-                            <option value="">Cargando unidades...</option>
+                            <option value="" disabled>Cargando unidades...</option>
                         </select>
                     </div>
                     <div class="mb-4">
                         <label class="fw-bold">Proveedor</label>
                         <select id="prov" class="form-select" required>
-                            <option value="">Cargando proveedores...</option>
+                            <option value="" disabled>Cargando proveedores...</option>
                         </select>
                     </div>
 
@@ -163,14 +163,15 @@
         <div id="vista-documentos" class="seccion">
             <div class="custom-card shadow mb-4">
                 <h3 id="titulo-doc" class="mb-4">Documento de Almacén</h3>
+                <form class="formDocumentos">
                 <div class="row g-3">
                     <div class="col-md-4">
                         <label class="fw-bold">No. Documento</label>
-                        <input type="text" id="doc-numero" class="form-control">
+                        <input type="number" id="doc-numero" class="form-control" required>
                     </div>
                     <div class="col-md-4">
                         <label class="fw-bold">Fecha</label>
-                        <input type="date" id="doc-fecha" class="form-control">
+                        <input type="date" id="doc-fecha" class="form-control" required>
                     </div>
                     <div class="col-md-4">
                         <label class="fw-bold">Tipo</label>
@@ -178,19 +179,18 @@
                     </div>
                     <div class="col-md-6">
                         <label id="lbl-entidad" class="fw-bold">Proveedor / Destino</label>
-                        <select id="doc-entidad" class="form-select"></select>
+                        <select id="doc-entidad" class="form-select" required></select>
                     </div>
                     <div class="col-md-6">
                         <label class="fw-bold">Concepto</label>
-                        <select id="doc-concepto" class="form-select"></select>
+                        <select id="doc-concepto" class="form-select" required></select>
                     </div>
                 </div>
                 <div class="text-center mt-4">
-                    <button class="btn bg-blue px-4" data-bs-toggle="modal" data-bs-target="#modalProd">Agregar Movimientos</button>
-                </div>
+                    <a class="btn bg-blue px-4" data-bs-toggle="modal" data-bs-target="#modalProd">Agregar Movimientos</a>
+                </div> 
             </div>
 
-            
 
             <div class="custom-card shadow">
                 <h6 class="fw-bold text-center">REGISTRO DE MOVIMIENTOS</h6>
@@ -206,9 +206,10 @@
                     <h4 class="fw-bold">TOTAL: <span id="doc-total">$0.00</span></h4>
                 </div>
                 <div class="d-flex justify-content-center mt-4 gap-3">
-                    <button class="btn bg-blue w-50" onclick="guardarDocumentoCompleto()">Guardar Documento y Movimientos</button>
+                    <button class="btn bg-blue w-50" type="submit">Guardar Documento y Movimientos</button>
                 </div>
             </div>
+            </form>
         </div>
 
         <div id="reporte-conceptos" class="seccion mx-auto" style="max-width: 600px;">
@@ -268,16 +269,16 @@
                 <h4 class="text-center fw-bold mb-4">AGREGAR MOVIMIENTO</h4>
                 <div class="mb-3">
                     <label>Producto</label>
-                    <input type="text" id="m-prod" class="form-control">
+                    <select id="m-prod" class="form-select" required>'<option value="" disabled>Seleccione una opción...</option>'</select>
                 </div>
                 <div class="row mb-3">
                     <div class="col-6">
                         <label>Precio</label>
-                        <input type="number" id="m-precio" class="form-control">
+                        <input type="number" id="m-precio" class="form-control" required>
                     </div>
                     <div class="col-6">
                         <label>Cantidad</label>
-                        <input type="number" id="m-cant" class="form-control">
+                        <input type="number" id="m-cant" class="form-control" required>
                     </div>
                 </div>
                 <div class="mb-4">
