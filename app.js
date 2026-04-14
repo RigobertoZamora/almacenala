@@ -1,5 +1,4 @@
-
-const API_URL = 'https://api-almacen-backend.onrender.com/api/';
+const API_URL = 'https://api-almacen-backend.onrender.com/api/'; // Cambia el puerto si tu servidor usa otro
 let catalogoActual = ""; // Guardará 'conceptos', 'destinos', etc.
 
 // ==========================================
@@ -111,6 +110,12 @@ async function eliminarRegistro(tabla, clave) {
 document.querySelectorAll('.formCatalogo').forEach(formulario => {
     formulario.addEventListener('submit', async (e) => {
         e.preventDefault();
+        const valorDescripcion = [e.target.querySelector('#desc')?.value || '', e.target.querySelector('#clave')?.value || '']; 
+        const tieneEtiquetasHTML = /[<>]/g.test(valorDescripcion);
+        if (tieneEtiquetasHTML) {
+            alert("El formulario no debe contener etiquetas HTML :), solo texto limpio.");
+            return; 
+        }
         
         // e.target es el formulario específico que acabas de enviar. 
         // Usamos querySelector interno para que no se confunda con los IDs repetidos en tu HTML.
@@ -154,7 +159,7 @@ document.querySelectorAll('.formCatalogo').forEach(formulario => {
 // ==========================================
 let movimientosActuales = [];
 let tipoDocumentoActual = "";
-
+// Al abrir un documento, se carga la información necesaria según si es entrada o salida. Esto incluye el título, los selects de proveedores/destinos, conceptos y productos. También se limpia la tabla de movimientos para empezar desde cero.
 function abrirDocumento(tipo) {
     tipoDocumentoActual = tipo;
     movimientosActuales = [];
@@ -163,28 +168,37 @@ function abrirDocumento(tipo) {
     document.getElementById('lbl-entidad').innerText = (tipo === 'Entrada') ? "Proveedor" : "Destino";
     // ---Cargar los datos de la base de datos ---
     if (tipo === 'Entrada') {
-        cargarSelect('proveedores', 'doc-entidad');
+        cargarSelect('proveedores', 'doc-entidad','NA');
     } else {
-        cargarSelect('destinos', 'doc-entidad');
+        cargarSelect('destinos', 'doc-entidad','NA');
     }
-    cargarSelect('conceptos', 'doc-concepto');
+    cargarSelect('conceptos', 'doc-concepto','NA');
+    cargarSelect('productos', 'm-prod', tipo);
     actualizarTabla();
     navegar('vista-documentos');
 }
-
-async function cargarSelect(tabla, idSelect) {
+//Se cargan selects cada vez que se abre el modal para agregar un movimiento, así se asegura que el usuario siempre tenga la información más actualizada de productos, destinos, proveedores y conceptos.
+async function cargarSelect(tabla, idSelect, tipo) {
     const select = document.getElementById(idSelect); 
     // Ponemos un mensaje de carga
-    select.innerHTML = '<option value="">Cargando...</option>';
+    select.innerHTML = '<option value="" selected disabled>Cargando...</option>';
     try {
         const response = await fetch(`${API_URL}${tabla}`);
         const datos = await response.json();
-        select.innerHTML = '<option value="">Seleccione una opción...</option>';
+        select.innerHTML = '<option value="" selected disabled>Seleccione una opción...</option>';
         datos.forEach(item => {
-            // Usamos 'descripcion' o 'nombre' dependiendo de la tabla
-            const texto = item.descripcion || item.nombre || item.nombre_proveedor;
-            const id = item.id || item.clave;
-            select.innerHTML += `<option value="${id}">${texto}</option>`;
+            if(tipo!='Salida'){
+                const texto = item.descripcion;
+                const id = item.idDestino || item.idProveedor || item.idConcepto || item.idProducto;
+                select.innerHTML += `<option value="${id}">${texto}</option>`;
+                console.log(id,texto)
+            }else{
+                if(item.existencia > 0){
+                    const texto = item.descripcion + " (Exist: " + item.existencia + ")";
+                    const id = item.idProducto;
+                    select.innerHTML += `<option value="${id}">${texto}</option>`;
+                }
+            }
         });
     } catch (error) {
         console.error(`Error al cargar ${tabla}:`, error);
@@ -193,12 +207,15 @@ async function cargarSelect(tabla, idSelect) {
 }
 
 
-    // --------------------------------------------------
-
+ // ------------ GUARDADO DINÁMICO DE DOCUMENTOS -------------------- //
+//Variables de los inputs para calcular el subtotal dinámicamente cada vez que el usuario modifique el precio o la cantidad
 const inPre = document.getElementById('m-precio');
 const inCan = document.getElementById('m-cant');
 const inSub = document.getElementById('m-sub');
-
+const precios = [];
+const nombres = [];
+//Evaluar que los inputs existan antes de agregar los event listeners para evitar errores null
+//Después de cada input, se hace el cálculo del subtotal y se actualiza el campo correspondiente. Se hace en ambos inputs para que el usuario pueda modificar cualquiera de los dos y siempre tener el subtotal actualizado.
 if(inPre && inCan && inSub) {
     [inPre, inCan].forEach(input => {
         input.addEventListener('input', () => {
@@ -207,26 +224,27 @@ if(inPre && inCan && inSub) {
         });
     });
 }
-
+// Agregar un movimiento al documento actual (entrada o salida)
 function agregarMovimiento() {
-    const p = document.getElementById('m-prod').value;
+    const p = parseInt(document.getElementById('m-prod').value);
     const pre = parseFloat(inPre.value) || 0;
+    precios.push(pre);
     const can = parseFloat(inCan.value) || 0;
-
+    const descripcion = document.getElementById('m-prod').selectedOptions[0]?.text || "Producto desconocido";
+    nombres.push(descripcion);
     if(p && can > 0) {
         movimientosActuales.push({ 
             no: movimientosActuales.length + 1, 
             producto: p, 
-            precio: pre, 
             cantidad: can, 
             subtotal: pre * can 
         });
-        actualizarTabla();
+        actualizarTabla(descripcion);
         bootstrap.Modal.getInstance(document.getElementById('modalProd')).hide();
         document.getElementById('m-prod').value = ""; inPre.value = ""; inCan.value = ""; inSub.value = "";
     }
 }
-
+//Actualizar la tabla de movimientos cada vez que se agrega uno nuevo o se envía el documento
 function actualizarTabla() {
     const cuerpo = document.getElementById('tabla-movimientos');
     if(!cuerpo) return;
@@ -237,26 +255,139 @@ function actualizarTabla() {
     movimientosActuales.forEach(m => {
         total += m.subtotal;
         cuerpo.innerHTML += `<tr>
-            <td>${m.no}</td><td>${m.producto}</td><td>${m.cantidad}</td>
-            <td>$${m.precio.toFixed(2)}</td><td>$${m.subtotal.toFixed(2)}</td>
+            <td>${m.no}</td><td>${nombres[m.no - 1]}</td><td>${m.cantidad}</td>
+            <td>$${precios[m.no - 1].toFixed(2)}</td><td>$${m.subtotal.toFixed(2)}</td>
         </tr>`;
     });
     document.getElementById('doc-total').innerText = `$${total.toFixed(2)}`;
 }
+//Envío de documento de salida o entrada
+document.querySelectorAll('.formDocumentos').forEach(formulario => {
+    formulario.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-function guardarDocumentoCompleto() {
-    const dataFinal = {
-        numero: document.getElementById('doc-numero').value,
-        fecha: document.getElementById('doc-fecha').value,
-        tipo: tipoDocumentoActual,
-        entidad: document.getElementById('doc-entidad').value,
-        concepto: document.getElementById('doc-concepto').value,
-        items: movimientosActuales
-    };
-    console.log("Objeto preparado para la BD:", dataFinal);
-    alert("Documento generado. Revisa la consola.");
-}
+        // 1. Armamos UN solo objeto con toda la información
+        const payload = {
+            numero: parseInt(document.getElementById('doc-numero').value) || 0,
+            fecha: document.getElementById('doc-fecha').value,
+            concepto: parseInt(document.getElementById('doc-concepto').value) || 0,
+            entidad: parseInt(document.getElementById('doc-entidad').value) || 0,
+            tipo: document.getElementById('doc-tipo').value.toLowerCase(), // "entrada" o "salida"
+            movimientos: movimientosActuales // <- Mandamos el array completo aquí
+        };
 
+        console.log("Enviando transacción completa:", payload);
+
+        // 2. Hacemos un SOLO fetch a una ruta que maneje toda la transacción
+        try {
+            // Se define la ruta dinámicamente según si es entrada o salida
+            let URL_DINAMICA = `${API_URL}documentos/${payload.tipo}`; 
+            console.log("URL a la que se enviará la transacción:", URL_DINAMICA);
+
+            // CORRECCIÓN: Guardar el resultado del fetch en la variable "response"
+            const response = await fetch(URL_DINAMICA, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload) 
+            });
+            
+            // Ahora response sí existe y tiene la propiedad .ok
+            if (response.ok) {
+                alert(`Guardado exitosamente.`);
+                const inputTipo = document.getElementById('doc-tipo');
+                const tipoGuardado = inputTipo.value;
+                formulario.reset();
+                inputTipo.value = tipoGuardado;
+                movimientosActuales = []; // Vaciamos la lista local
+                actualizarTabla(); // Limpiamos la tabla visual
+                cargarSelect('productos', 'm-prod', tipoGuardado); // Recargamos productos para actualizar existencias
+            } else {
+                throw new Error("Error en la respuesta del servidor");
+            }
+        } catch (error) {
+            console.error("Error al guardar la transacción:", error);
+            alert("Hubo un error de conexión con la base de datos, verifica tus datos.");
+        }
+    });
+});
+/*
+//Lógica fallida por sobrecarga al servidor y vulnerabilidad de intercepción de datos. Se dejó como referencia para futuras mejoras con WebSockets o similar.
+document.querySelectorAll('.formDocumentos').forEach(formulario => {
+    catalogoActual = "documentos"; // Aseguramos que el endpoint sea 'documentos' para esta sección
+    tipo = "/"+document.getElementById('doc-tipo').value.toLowerCase(); // "/entrada" o "/salida"
+    formulario.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        let nuevoDocumento = 0;
+        const dataDocumentos = {
+            numero: parseInt(document.getElementById('doc-numero').value) || 0,
+            fecha: document.getElementById('doc-fecha').value,
+            concepto: parseInt(document.getElementById('doc-concepto').value) || 0,
+        };
+        console.log("Objeto preparado para la BD, tabla principal:", dataDocumentos);
+        alert("Documento generado. Revisa la consola.");
+        let URL_DINAMICA = `${API_URL}${catalogoActual}`;
+        try {
+            console.log(dataDocumentos);
+            await fetch(URL_DINAMICA, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dataDocumentos)
+            });
+        } catch (error) {
+            console.error("Error al guardar:", error);
+            alert("Hubo un error de conexión con la base de datos 1.");
+        }
+        try {
+            const response = await fetch(`${API_URL}${catalogoActual}`);
+            const datos = await response.json();
+            datos.forEach(item => {
+                if(item.noDocumento == dataDocumentos.numero)
+                    nuevoDocumento = parseInt(item.idDocumento) || 0;
+            });
+        } catch (error) {
+            console.error(`Error al cargar ${catalogoActual}:`, error);
+        }
+        const dataDocumentosEspecifico = {
+            idDocumento: nuevoDocumento,
+            entidad: parseInt(document.getElementById('doc-entidad').value) || 0,
+        };
+        URL_DINAMICA = `${API_URL}${catalogoActual}${tipo}`; // "http://localhost:3000/api/documentos/entrada"
+        try {
+            console.log(dataDocumentosEspecifico);
+            await fetch(URL_DINAMICA, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dataDocumentosEspecifico)
+            });
+        } catch (error) {
+            console.error("Error al guardar:", error);
+            alert("Hubo un error de conexión con la base de datos 2.");
+        }
+        tipo = "/movimientos"; // Endpoint para guardar los movimientos relacionados al documento
+        const dataDetalle = {
+            idDocumento: nuevoDocumento,
+            items: movimientosActuales
+        };
+        URL_DINAMICA = `${API_URL}${catalogoActual}${tipo}`;
+        try {
+            console.log(dataDetalle);
+            await fetch(URL_DINAMICA, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dataDetalle)
+            });
+            alert(`Guardado exitosamente en ${catalogoActual}`);
+            formulario.reset();
+        } catch (error) {
+            console.error("Error al guardar:", error);
+            alert("Hubo un error de conexión con la base de datos 3.");
+        }
+        alert(`Guardado exitosamente en ${catalogoActual}`);
+        formulario.reset();
+        catalogoActual = ""; // Limpiamos la variable para evitar confusiones futuras
+    });
+});
+*/
 // ==========================================
 // 4. CORRECCIÓN DEL SUBMENÚ (Este es el que se bloqueaba)
 // ==========================================
@@ -275,18 +406,6 @@ document.addEventListener("DOMContentLoaded", function(){
     }
 });
 
-
-
-
-
-
-
-
-
-
-
-
-
 async function cargarSelectoresProductos() {
     try {
         // 1. Pedimos los datos al backend (hacemos dos peticiones a la vez)
@@ -303,10 +422,10 @@ async function cargarSelectoresProductos() {
         const selectUni = document.getElementById('uni');
 
         // 3. Llenamos las opciones (el 'value' guarda la clave numérica, el texto muestra la descripción)
-        selectProv.innerHTML = '<option value="">Selecciona un proveedor...</option>' + 
+        selectProv.innerHTML = '<option value="" selected disabled>Selecciona un proveedor...</option>' + 
             proveedores.map(p => `<option value="${p.idProveedor}">${p.descripcion}</option>`).join('');
 
-        selectUni.innerHTML = '<option value="">Selecciona una unidad...</option>' + 
+        selectUni.innerHTML = '<option value="" selected disabled>Selecciona una unidad...</option>' + 
             unidades.map(u => `<option value="${u.idUnidadMedida}">${u.descripcion}</option>`).join('');
 
     } catch (error) {
