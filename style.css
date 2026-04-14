@@ -20,3 +20,353 @@
             display: block !important; 
             position: absolute !important;
         }
+
+
+
+
+
+/*codigo de estilo para los documentos ----------------------------------------------------------------*/
+    /*codigo de estilo para pagina principal de documentos ------------------*/
+            /*codigo de estilo para el selector de tres posiciones de la pagina principal------------------*/
+            #mi-selector-unico {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            padding: 10px 0;
+            }
+
+            #mi-selector-unico .tri-state-container {
+            display: flex;
+            position: relative;
+            width: 90vw; /* 90% del ancho de la pantalla */
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            height: 60px;
+            }
+
+            /* Para poder ocultar los circulitos de radio que estan por defecto*/
+            #mi-selector-unico input[type="radio"] {
+            display: none;
+            }
+
+            /* Estilo de los textos/botones */
+            #mi-selector-unico label {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            font-size: 14px;
+            color: #666;
+            transition: color 0.3s;
+            z-index: 2;
+            }
+
+            /* La línea de color abajo */
+            #mi-selector-unico .barra-indicadora {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 5px; /* Grosor de la línea */
+            width: 33.33%; /* Un tercio del total */
+            background: #ccc;
+            transition: all 0.3s ease;
+            z-index: 3;
+            }
+            #mi-selector-unico label:hover {
+                color: #333; /* El texto se oscurece */
+                background-color: rgba(0, 0, 0, 0.03);  
+                border: 2px solid rgba(0, 0, 0, 0.08);
+            }
+
+            /* --- Lógica de Colores al presionar alguno --- */
+            /* Posición 1: ENTRADA (Verde) */
+            #pos-entrada:checked ~ .barra-indicadora {
+            left: 0;
+            background-color: #28a745; /* Verde */
+            }
+            /* Posición 2: MEDIO (Azul) */
+            #pos-medio:checked ~ .barra-indicadora {
+            left: 33.33%;
+            background-color: #007bff; /* Azul */
+            }
+            /* Posición 3: SALIDA (Rojo) */
+            #pos-salida:checked ~ .barra-indicadora {
+            left: 66.66%;
+            background-color: #dc3545; /* Rojo */
+            }
+            /* Cambio de color de texto tambien cuando se selecciona */
+            #pos-entrada:checked + label { color: #28a745; }
+            #pos-medio:checked + label { color: #007bff; }
+            #pos-salida:checked + label { color: #dc3545; }
+
+            /*codigo de estilo para el selector de tres posiciones de la pagina principal------------------FIN*/
+
+
+            /*codigo de estilo para el ordenar por de la pagina principal------------------*/
+            .orden-container {
+                width: 90vw;
+                margin: 0 auto 30px auto;
+                display: flex;
+                align-items: center;
+                gap: 20px;
+                padding-left: 10px;
+            }
+            .btn-orden {
+                background: transparent;
+                border: 1px solid #eee;
+                padding: 6px 15px;
+                font-size: 11px;
+                font-weight: 700;
+                color: #777;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                text-transform: uppercase;
+            }
+            /* Efecto Hover para los botones de orden */
+            .btn-orden:hover {
+                border-color: #333;
+                color: #333;
+                background: #fdfdfd;
+            }
+            /* Estado cuando el filtro está seleccionado para poder ver en cual estas */
+            .btn-orden.active {
+                background: #333;
+                color: #fff;
+                border-color: #333;
+            }
+            .orden-group {   
+                display: flex;
+                align-items: center; 
+                gap: 15px;
+            }
+            .label-orden {  
+                font-size: 10px; 
+                font-weight: 800;
+                color: #bbb;
+                letter-spacing: 1px;
+                margin: 0; 
+                white-space: nowrap;
+                display: inline-flex;
+                align-items: center;
+                height: 100%; 
+                line-height: 1; /* Evita espacios extra arriba/abajo del texto */
+            }
+            .botones-orden {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                margin-right: 0;
+            }
+
+            /*codigo de estilo para el ordenar por de la pagina principal------------------FIN*/
+
+
+            /*codigo de estilo para el boscador de la pagina principal ------------------*/
+            .toolbar-reportes {
+                width: 90vw;
+                margin: 10px auto 25px auto;
+                display: flex;
+                justify-content: space-between; /* Buscador a la izq, Orden a la der */
+                align-items: center;
+            }
+            .buscador-container {
+                width: 90vw;
+                margin: 0 auto 15px auto; 
+                display: flex;
+                justify-content: flex-end; /* Alineado a la derecha como el orden */
+            }
+            .search-box {
+                display: flex;
+                align-items: center;
+                background: #fff;
+                border: 1px solid #ddd;
+                height: 45px;
+                width: 100%;
+                max-width: 500px; 
+                padding: 0 15px;
+                transition: all 0.3s ease;
+            }
+            .search-box:focus-within {
+                border-color: #333;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            }
+            .search-select {
+                border: none;
+                outline: none;
+                background: transparent;
+                font-size: 11px;
+                font-weight: 800;
+                color: #555;
+                cursor: pointer;
+                text-transform: uppercase;
+                padding-right: 10px;
+            }
+            .search-divider {
+                width: 1px;
+                height: 20px;
+                background: #eee;
+                margin: 0 15px;
+            }
+            #input-busqueda {
+                border: none;
+                outline: none;
+                flex-grow: 1;
+                font-size: 14px;
+                color: #333;
+            }
+            .search-icon {
+                color: #bbb;
+                font-size: 16px;
+            }
+            /*codigo de estilo para el boscador de la pagina principal ------------------FIN*/
+            
+            
+            /*codigo de estilo para los bloques de los reportes------------------*/
+            /* Contenedor de los bloques para que no peguen a los bordes */
+            #contenedor-bloques {
+                padding: 0px 20px;
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                gap: 25px;
+            }
+            /* El Bloque Cuadrado */
+            .card-documento {
+                background: #ffffff;
+                border: 1px solid #e0e0e0; /* Borde para definir el cuadro */
+                padding: 25px;
+                position: relative;
+                display: flex;
+                flex-direction: column;
+                transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+                cursor: pointer;
+                min-height: 180px;
+                width: 100%;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.02); /* Sombra casi invisible */
+            }
+            /* Efecto al pasar el mouse (Hover) en un bloque*/
+            .card-documento:hover {
+                box-shadow: 0 14px 28px rgba(0,0,0,0.1), 0 10px 10px rgba(0,0,0,0.05);
+                transform: translateY(-5px);
+                border-color: #333; /* El borde se oscurece para resaltarlo */
+            }
+            /* Texto dentro del bloque */
+            .card-documento h5 {
+                font-size: 1.2rem;
+                font-weight: 700;
+                margin-top: 10px;
+                color: #1a1a1a;
+            }
+            .card-documento .concepto-txt {
+                font-size: 0.9rem;
+                color: #666;
+                flex-grow: 1; 
+            }
+            .card-documento .footer-card {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 15px;
+                padding-top: 15px;
+                border-top: 1px solid #f5f5f5;
+            }
+        /*codigo de estilo para los bloques de los reportes------------------FIN*/
+
+
+    /*codigo de estilo para pagina principal de documentos ------------------------------------------FIN*/
+
+    
+    /*codigo de estilo para lo de los pdfs generados------------------*/
+
+        @media print {
+            /* Oculta todo lo que no sea el área del documento */
+            body * { visibility: hidden; }
+            #area-imprimible, #area-imprimible * { visibility: visible; }
+            #area-imprimible {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 95%;
+                box-shadow: none !important;
+            }
+            .no-print { display: none !important; }
+        }
+        /* Estilo para que la hoja */
+        #area-imprimible {
+            border: 1px solid #ddd;
+            font-family: 'Segoe UI', sans-serif;
+        }
+    /*codigo de estilo para lo de los pdfs generados------------------FIN*/
+
+
+    /*codigo de estilo para pagina vista previa de un pdf ------------------------------------------*/
+    .menu-flotante {
+        position: fixed;              /* Deja el menú fijo aunque hagas scroll */
+        top: 50%;                     /* Lo baja a la mitad de la pantalla */
+        right: 25px;                  /* Lo separa 25px del borde derecho */
+        transform: translateY(-50%);  /* Centra el recuadro en el eje Y */
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 12px;          /* Bordes redondeados */
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); /* Sombra */
+        border: 1px solid #e0e0e0;
+        width: 220px;                 /* Un ancho fijo para que los botones se vean parejos */
+        z-index: 1050;                /* Asegura que siempre esté por encima de la hoja PDF */
+        transition: all 0.3s ease;
+    }
+    /* Un pequeño efecto al pasar el mouse por encima del panel */
+    .menu-flotante:hover {
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+    }
+
+    /*codigo de estilo para pagina vista previa de un pdf ------------------------------------------FIN*/
+
+
+    /*codigo de estilo para los documentos descargados ----------------------------------------------------------------*/
+    @media print {
+        /* Margen seguro */
+        @page { 
+            margin: 0.5cm; 
+        }
+
+        /* quitar alturas minimas de Bootstrap al imprimir */
+        body, html, #pdf-view-page, .container, .container-fluid, .card {
+            min-height: 0 !important; /* Destruye el 100vh de Bootstrap */
+            height: auto !important;
+            margin-bottom: 0 !important;
+            padding-bottom: 0 !important;
+        }
+
+        /* DISEÑO */
+        .container, .container-fluid, .card, #pdf-view-page {
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 100% !important;
+            margin: 0 auto !important;
+            padding: 0 !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        /* QUITAR MÁRGENES FANTASMAS AL FINAL DEL DOCUMENTO */
+        .firma-container, #pdf-view-page *:last-child {
+            margin-bottom: 0 !important;
+            padding-bottom: 0 !important;
+        }
+
+        /* OCULTAR COSAS(Botones, saltos de línea sueltos, pies de página) QUE NO QUIERO*/
+        button, .btn, nav, header, footer, .footer, br {
+            display: none !important;
+        }
+        /* Proteger tablas y firmas de partirse a la mitad */
+        table, .firma-container {
+            page-break-inside: avoid !important;
+        }
+    }
+    /*codigo de estilo para los documentos descargados ----------------------------------------------------------------FIN*/
+
+
+/*codigo de estilo para los documentos ----------------------------------------------------------------FIN*/

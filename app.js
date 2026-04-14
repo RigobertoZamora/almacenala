@@ -1,4 +1,8 @@
-const API_URL = 'https://api-almacen-backend.onrender.com/api/'; // Cambia el puerto si tu servidor usa otro
+
+const API_URL = 'http://localhost:3000/api/';
+/*https://api-almacen-backend.onrender.com/api
+*/
+
 let catalogoActual = ""; // Guardará 'conceptos', 'destinos', etc.
 
 // ==========================================
@@ -110,12 +114,6 @@ async function eliminarRegistro(tabla, clave) {
 document.querySelectorAll('.formCatalogo').forEach(formulario => {
     formulario.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const valorDescripcion = [e.target.querySelector('#desc')?.value || '', e.target.querySelector('#clave')?.value || '']; 
-        const tieneEtiquetasHTML = /[<>]/g.test(valorDescripcion);
-        if (tieneEtiquetasHTML) {
-            alert("El formulario no debe contener etiquetas HTML :), solo texto limpio.");
-            return; 
-        }
         
         // e.target es el formulario específico que acabas de enviar. 
         // Usamos querySelector interno para que no se confunda con los IDs repetidos en tu HTML.
@@ -159,7 +157,7 @@ document.querySelectorAll('.formCatalogo').forEach(formulario => {
 // ==========================================
 let movimientosActuales = [];
 let tipoDocumentoActual = "";
-// Al abrir un documento, se carga la información necesaria según si es entrada o salida. Esto incluye el título, los selects de proveedores/destinos, conceptos y productos. También se limpia la tabla de movimientos para empezar desde cero.
+
 function abrirDocumento(tipo) {
     tipoDocumentoActual = tipo;
     movimientosActuales = [];
@@ -168,37 +166,28 @@ function abrirDocumento(tipo) {
     document.getElementById('lbl-entidad').innerText = (tipo === 'Entrada') ? "Proveedor" : "Destino";
     // ---Cargar los datos de la base de datos ---
     if (tipo === 'Entrada') {
-        cargarSelect('proveedores', 'doc-entidad','NA');
+        cargarSelect('proveedores', 'doc-entidad');
     } else {
-        cargarSelect('destinos', 'doc-entidad','NA');
+        cargarSelect('destinos', 'doc-entidad');
     }
-    cargarSelect('conceptos', 'doc-concepto','NA');
-    cargarSelect('productos', 'm-prod', tipo);
+    cargarSelect('conceptos', 'doc-concepto');
     actualizarTabla();
     navegar('vista-documentos');
 }
-//Se cargan selects cada vez que se abre el modal para agregar un movimiento, así se asegura que el usuario siempre tenga la información más actualizada de productos, destinos, proveedores y conceptos.
-async function cargarSelect(tabla, idSelect, tipo) {
+
+async function cargarSelect(tabla, idSelect) {
     const select = document.getElementById(idSelect); 
     // Ponemos un mensaje de carga
-    select.innerHTML = '<option value="" selected disabled>Cargando...</option>';
+    select.innerHTML = '<option value="">Cargando...</option>';
     try {
         const response = await fetch(`${API_URL}${tabla}`);
         const datos = await response.json();
-        select.innerHTML = '<option value="" selected disabled>Seleccione una opción...</option>';
+        select.innerHTML = '<option value="">Seleccione una opción...</option>';
         datos.forEach(item => {
-            if(tipo!='Salida'){
-                const texto = item.descripcion;
-                const id = item.idDestino || item.idProveedor || item.idConcepto || item.idProducto;
-                select.innerHTML += `<option value="${id}">${texto}</option>`;
-                console.log(id,texto)
-            }else{
-                if(item.existencia > 0){
-                    const texto = item.descripcion + " (Exist: " + item.existencia + ")";
-                    const id = item.idProducto;
-                    select.innerHTML += `<option value="${id}">${texto}</option>`;
-                }
-            }
+            // Usamos 'descripcion' o 'nombre' dependiendo de la tabla
+            const texto = item.descripcion || item.nombre || item.nombre_proveedor;
+            const id = item.id || item.clave;
+            select.innerHTML += `<option value="${id}">${texto}</option>`;
         });
     } catch (error) {
         console.error(`Error al cargar ${tabla}:`, error);
@@ -207,15 +196,12 @@ async function cargarSelect(tabla, idSelect, tipo) {
 }
 
 
- // ------------ GUARDADO DINÁMICO DE DOCUMENTOS -------------------- //
-//Variables de los inputs para calcular el subtotal dinámicamente cada vez que el usuario modifique el precio o la cantidad
+    // --------------------------------------------------
+
 const inPre = document.getElementById('m-precio');
 const inCan = document.getElementById('m-cant');
 const inSub = document.getElementById('m-sub');
-const precios = [];
-const nombres = [];
-//Evaluar que los inputs existan antes de agregar los event listeners para evitar errores null
-//Después de cada input, se hace el cálculo del subtotal y se actualiza el campo correspondiente. Se hace en ambos inputs para que el usuario pueda modificar cualquiera de los dos y siempre tener el subtotal actualizado.
+
 if(inPre && inCan && inSub) {
     [inPre, inCan].forEach(input => {
         input.addEventListener('input', () => {
@@ -224,27 +210,26 @@ if(inPre && inCan && inSub) {
         });
     });
 }
-// Agregar un movimiento al documento actual (entrada o salida)
+
 function agregarMovimiento() {
-    const p = parseInt(document.getElementById('m-prod').value);
+    const p = document.getElementById('m-prod').value;
     const pre = parseFloat(inPre.value) || 0;
-    precios.push(pre);
     const can = parseFloat(inCan.value) || 0;
-    const descripcion = document.getElementById('m-prod').selectedOptions[0]?.text || "Producto desconocido";
-    nombres.push(descripcion);
+
     if(p && can > 0) {
         movimientosActuales.push({ 
             no: movimientosActuales.length + 1, 
             producto: p, 
+            precio: pre, 
             cantidad: can, 
             subtotal: pre * can 
         });
-        actualizarTabla(descripcion);
+        actualizarTabla();
         bootstrap.Modal.getInstance(document.getElementById('modalProd')).hide();
         document.getElementById('m-prod').value = ""; inPre.value = ""; inCan.value = ""; inSub.value = "";
     }
 }
-//Actualizar la tabla de movimientos cada vez que se agrega uno nuevo o se envía el documento
+
 function actualizarTabla() {
     const cuerpo = document.getElementById('tabla-movimientos');
     if(!cuerpo) return;
@@ -255,139 +240,35 @@ function actualizarTabla() {
     movimientosActuales.forEach(m => {
         total += m.subtotal;
         cuerpo.innerHTML += `<tr>
-            <td>${m.no}</td><td>${nombres[m.no - 1]}</td><td>${m.cantidad}</td>
-            <td>$${precios[m.no - 1].toFixed(2)}</td><td>$${m.subtotal.toFixed(2)}</td>
+            <td>${m.no}</td><td>${m.producto}</td><td>${m.cantidad}</td>
+            <td>$${m.precio.toFixed(2)}</td><td>$${m.subtotal.toFixed(2)}</td>
         </tr>`;
     });
     document.getElementById('doc-total').innerText = `$${total.toFixed(2)}`;
 }
-//Envío de documento de salida o entrada
-document.querySelectorAll('.formDocumentos').forEach(formulario => {
-    formulario.addEventListener('submit', async (e) => {
-        e.preventDefault();
 
-        // 1. Armamos UN solo objeto con toda la información
-        const payload = {
-            numero: parseInt(document.getElementById('doc-numero').value) || 0,
-            fecha: document.getElementById('doc-fecha').value,
-            concepto: parseInt(document.getElementById('doc-concepto').value) || 0,
-            entidad: parseInt(document.getElementById('doc-entidad').value) || 0,
-            tipo: document.getElementById('doc-tipo').value.toLowerCase(), // "entrada" o "salida"
-            movimientos: movimientosActuales // <- Mandamos el array completo aquí
-        };
 
-        console.log("Enviando transacción completa:", payload);
 
-        // 2. Hacemos un SOLO fetch a una ruta que maneje toda la transacción
-        try {
-            // Se define la ruta dinámicamente según si es entrada o salida
-            let URL_DINAMICA = `${API_URL}documentos/${payload.tipo}`; 
-            console.log("URL a la que se enviará la transacción:", URL_DINAMICA);
 
-            // CORRECCIÓN: Guardar el resultado del fetch en la variable "response"
-            const response = await fetch(URL_DINAMICA, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload) 
-            });
-            
-            // Ahora response sí existe y tiene la propiedad .ok
-            if (response.ok) {
-                alert(`Guardado exitosamente.`);
-                const inputTipo = document.getElementById('doc-tipo');
-                const tipoGuardado = inputTipo.value;
-                formulario.reset();
-                inputTipo.value = tipoGuardado;
-                movimientosActuales = []; // Vaciamos la lista local
-                actualizarTabla(); // Limpiamos la tabla visual
-                cargarSelect('productos', 'm-prod', tipoGuardado); // Recargamos productos para actualizar existencias
-            } else {
-                throw new Error("Error en la respuesta del servidor");
-            }
-        } catch (error) {
-            console.error("Error al guardar la transacción:", error);
-            alert("Hubo un error de conexión con la base de datos, verifica tus datos.");
-        }
-    });
-});
-/*
-//Lógica fallida por sobrecarga al servidor y vulnerabilidad de intercepción de datos. Se dejó como referencia para futuras mejoras con WebSockets o similar.
-document.querySelectorAll('.formDocumentos').forEach(formulario => {
-    catalogoActual = "documentos"; // Aseguramos que el endpoint sea 'documentos' para esta sección
-    tipo = "/"+document.getElementById('doc-tipo').value.toLowerCase(); // "/entrada" o "/salida"
-    formulario.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        let nuevoDocumento = 0;
-        const dataDocumentos = {
-            numero: parseInt(document.getElementById('doc-numero').value) || 0,
-            fecha: document.getElementById('doc-fecha').value,
-            concepto: parseInt(document.getElementById('doc-concepto').value) || 0,
-        };
-        console.log("Objeto preparado para la BD, tabla principal:", dataDocumentos);
-        alert("Documento generado. Revisa la consola.");
-        let URL_DINAMICA = `${API_URL}${catalogoActual}`;
-        try {
-            console.log(dataDocumentos);
-            await fetch(URL_DINAMICA, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(dataDocumentos)
-            });
-        } catch (error) {
-            console.error("Error al guardar:", error);
-            alert("Hubo un error de conexión con la base de datos 1.");
-        }
-        try {
-            const response = await fetch(`${API_URL}${catalogoActual}`);
-            const datos = await response.json();
-            datos.forEach(item => {
-                if(item.noDocumento == dataDocumentos.numero)
-                    nuevoDocumento = parseInt(item.idDocumento) || 0;
-            });
-        } catch (error) {
-            console.error(`Error al cargar ${catalogoActual}:`, error);
-        }
-        const dataDocumentosEspecifico = {
-            idDocumento: nuevoDocumento,
-            entidad: parseInt(document.getElementById('doc-entidad').value) || 0,
-        };
-        URL_DINAMICA = `${API_URL}${catalogoActual}${tipo}`; // "http://localhost:3000/api/documentos/entrada"
-        try {
-            console.log(dataDocumentosEspecifico);
-            await fetch(URL_DINAMICA, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(dataDocumentosEspecifico)
-            });
-        } catch (error) {
-            console.error("Error al guardar:", error);
-            alert("Hubo un error de conexión con la base de datos 2.");
-        }
-        tipo = "/movimientos"; // Endpoint para guardar los movimientos relacionados al documento
-        const dataDetalle = {
-            idDocumento: nuevoDocumento,
-            items: movimientosActuales
-        };
-        URL_DINAMICA = `${API_URL}${catalogoActual}${tipo}`;
-        try {
-            console.log(dataDetalle);
-            await fetch(URL_DINAMICA, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(dataDetalle)
-            });
-            alert(`Guardado exitosamente en ${catalogoActual}`);
-            formulario.reset();
-        } catch (error) {
-            console.error("Error al guardar:", error);
-            alert("Hubo un error de conexión con la base de datos 3.");
-        }
-        alert(`Guardado exitosamente en ${catalogoActual}`);
-        formulario.reset();
-        catalogoActual = ""; // Limpiamos la variable para evitar confusiones futuras
-    });
-});
-*/
+
+function guardarDocumentoCompleto() {
+    const dataFinal = {
+        numero: document.getElementById('doc-numero').value,
+        fecha: document.getElementById('doc-fecha').value,
+        tipo: tipoDocumentoActual,
+        entidad: document.getElementById('doc-entidad').value,
+        concepto: document.getElementById('doc-concepto').value,
+        items: movimientosActuales
+    };
+    console.log("Objeto preparado para la BD:", dataFinal);
+    alert("Documento generado. Revisa la consola.");
+}
+
+
+
+
+
+
 // ==========================================
 // 4. CORRECCIÓN DEL SUBMENÚ (Este es el que se bloqueaba)
 // ==========================================
@@ -422,13 +303,278 @@ async function cargarSelectoresProductos() {
         const selectUni = document.getElementById('uni');
 
         // 3. Llenamos las opciones (el 'value' guarda la clave numérica, el texto muestra la descripción)
-        selectProv.innerHTML = '<option value="" selected disabled>Selecciona un proveedor...</option>' + 
+        selectProv.innerHTML = '<option value="">Selecciona un proveedor...</option>' + 
             proveedores.map(p => `<option value="${p.idProveedor}">${p.descripcion}</option>`).join('');
 
-        selectUni.innerHTML = '<option value="" selected disabled>Selecciona una unidad...</option>' + 
+        selectUni.innerHTML = '<option value="">Selecciona una unidad...</option>' + 
             unidades.map(u => `<option value="${u.idUnidadMedida}">${u.descripcion}</option>`).join('');
 
     } catch (error) {
         console.error("Error cargando selectores:", error);
     }
 }
+
+
+
+
+
+
+
+
+
+// ==========================================
+// LÓGICA DE DOCUMENTOS DE ENTRADA Y SALIDA
+// ==========================================
+
+
+//funcion para poder mostrar la parte de los reportes:
+// Variable global para guardar lo que viene de la DB
+let todosLosDocumentos = []; // Variable global para no recargar la DB a cada rato
+function reporte(idSeccion) {
+    const secciones = document.querySelectorAll('.seccion');
+    secciones.forEach(sec => sec.style.display = 'none');
+    const seccionAMostrar = document.getElementById(idSeccion);
+    if (seccionAMostrar) {
+        seccionAMostrar.style.display = 'block';
+        // Si entramos a reportes, traemos los datos de la base de datos
+        if (idSeccion === 'documents-page') {
+            obtenerDatosServidor();
+        }
+    }
+}
+
+async function obtenerDatosServidor() {
+    const contenedor = document.getElementById('contenedor-bloques');
+    contenedor.innerHTML = '<p class="text-center w-100">Cargando reportes...</p>';
+
+    try {
+        const res = await fetch('http://localhost:3000/api/documentos');
+        todosLosDocumentos = await res.json();
+        // Por defecto mostramos "Ambos"
+        mostrarBloques('ambos');
+    } catch (error) {
+        contenedor.innerHTML = '<p class="text-center text-danger w-100">Error de conexión</p>';
+    }
+}
+
+function mostrarBloques(filtro) {
+    const contenedor = document.getElementById('contenedor-bloques');
+    contenedor.innerHTML = ''; 
+    const filtrados = todosLosDocumentos.filter(doc => {
+        if (filtro === 'ambos') return true;
+        return doc.tipoDocumento.toLowerCase() === filtro.toLowerCase();
+    });
+    filtrados.forEach(doc => {
+        const color = doc.tipoDocumento === 'Entrada' ? '#28a745' : '#dc3545';
+        
+        // Lógica de datos
+        const nombreEntidad = doc.tipoDocumento === 'Entrada' ? doc.proveedor : doc.destino;
+        const prefijo = doc.tipoDocumento === 'Entrada' ? 'Proveedor: ' : 'Destino: ';
+        contenedor.innerHTML += `
+            <div class="card-documento" onclick="verDetallePdf(${doc.idDocumento})">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span style="color: ${color}; font-weight: 800; font-size: 14px; letter-spacing: 1px; text-transform: uppercase;">
+                        ${doc.tipoDocumento}
+                    </span>
+                    <span class="text-muted small fw-bold">NO.#${doc.noDocumento}</span>
+                </div>
+                <h3 style="font-size: 18px; margin: 12px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    <span style="font-size: 12px; color: #888; font-weight: 400; text-transform: uppercase;">${prefijo}</span>
+                    <span style="font-weight: 700;">${nombreEntidad || 'Sin registro'}</span>
+                </h3>
+                <div class="footer-card">
+                    <span class="small text-secondary">${new Date(doc.fecha).toLocaleDateString()}</span>
+                    <div style="background: #f8f9fa; padding: 5px 10px; border-radius: 4px;">
+                         <i class="bi bi-file-earmark-pdf text-danger"></i>
+                         <span class="ms-1 small fw-bold" style="font-size: 10px;">PDF</span>
+                    </div>
+                </div>
+                <div style="height: 3px; background: ${color}; width: 100%; position: absolute; bottom: 0; left: 0;"></div>
+            </div>
+        `;
+    });
+}
+// Se Escucha para el cambio de posición (Slider)
+document.getElementById('pos-entrada')?.addEventListener('change', () => mostrarBloques('entrada'));
+document.getElementById('pos-medio')?.addEventListener('change', () => mostrarBloques('ambos'));
+document.getElementById('pos-salida')?.addEventListener('change', () => mostrarBloques('salida'));
+
+
+//funcion para poder ver los datos de cuando vas a preview del documento
+async function verDetallePdf(id) {
+    const docPrincipal = todosLosDocumentos.find(d => d.idDocumento == id);
+    if (!docPrincipal) {
+        console.error("No se encontró el doc con ID:", id);
+        return;
+    }
+    try {
+        const response = await fetch(`http://localhost:3000/api/documentos/${id}/detalle`);
+        const detalles = await response.json();
+        // Lógica de detección de tipo 
+        const tipo = (docPrincipal.tipoDocumento || "").toLowerCase();
+        const esEntrada = tipo === 'entrada';
+        // Llenar campos básicos
+        document.getElementById('pdf-tipo').innerText = esEntrada ? 'ENTRADA' : 'SALIDA';
+        document.getElementById('pdf-tipo').style.color = esEntrada ? '#198754' : '#dc3545';
+        document.getElementById('pdf-folio').innerText = docPrincipal.noDocumento || id;
+        document.getElementById('pdf-fecha').innerText = new Date(docPrincipal.fecha).toLocaleDateString();
+        // Etiqueta de entidad
+        const etiqueta = document.getElementById('pdf-etiqueta-entidad');
+        if(etiqueta) etiqueta.innerText = esEntrada ? 'PROVEEDOR:' : 'DESTINO:';
+        // Nombre de entidad 
+        const nombreEntidad = esEntrada ? docPrincipal.proveedor : docPrincipal.destino;
+        document.getElementById('pdf-entidad').innerText = nombreEntidad || 'No registrado';
+        // Tabla de productos
+        const tablaCuerpo = document.getElementById('pdf-tabla-cuerpo');
+        tablaCuerpo.innerHTML = '';
+        let sumaTotal = 0;
+    detalles.forEach(p => {
+        const sub = parseFloat(p.subtotal || 0);
+        sumaTotal += sub;
+
+        tablaCuerpo.innerHTML += `
+            <tr>
+                <td class="text-muted small">${p.clave || '---'}</td>
+                <td>${p.descripcion || 'Sin descripción'}</td>
+                <td class="text-center">$${parseFloat(p.precioUnitario || 0).toFixed(2)}</td>
+                <td class="text-center">${p.cantidad || 0}</td>
+                <td class="text-end fw-bold">$${sub.toFixed(2)}</td>
+            </tr>`;
+    });
+    document.getElementById('pdf-total').innerText = `$${sumaTotal.toFixed(2)}`;
+
+    // Configurar descarga
+        document.getElementById('btn-descargar-server').onclick = async function() {
+            // Guardar el contenido original y bloquear el botón
+            const contenidoOriginal = this.innerHTML;
+            this.disabled = true;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Descargando...';
+
+            try {
+                // Hacer la petición al servidor esperando la respuesta
+                const res = await fetch(`http://localhost:3000/api/pdf/${id}`);
+                if (!res.ok) throw new Error("Error al generar el PDF en el servidor");
+                //Convertir respuesta a archivo (Blob)
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                // Crear enlace invisible y forzar el clic para descargarlo
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Documento_${docPrincipal.noDocumento || id}.pdf`; // Nombre automático, aqui se puede cambiar si queremos que diga otra cosa o puede estar pondiente si hacemos un menu en donde el usuario pueda poner el nombre antes de descargar
+                document.body.appendChild(a);
+                a.click(); 
+                // Limpiar la memoria
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error("Error al descargar:", error);
+                alert("Hubo un error al descargar el PDF.");
+            } finally {
+                //Restaurar el botón, Esto solo pasa cuando el archivo ya se descargó
+                this.disabled = false;
+                this.innerHTML = contenidoOriginal;
+            }
+        };
+        // Mostrar sección
+        document.getElementById('documents-page').style.display = 'none';
+        document.getElementById('pdf-view-page').style.display = 'block';
+    } catch (error) {
+        console.error("Error en el fetch:", error);
+    }
+}
+
+
+//funcion para mostrar los documentos al hacer una busqueda en la pantalla principal
+function ejecutarBusqueda() {
+    const textoBusqueda = document.getElementById('input-busqueda').value.toLowerCase();
+    const criterio = document.getElementById('buscar-por').value;
+    // Obtenemos qué tipo (Entrada/Salida/Ambos) está seleccionado en el slider de arriba
+    const selectorActivo = document.querySelector('input[name="posicion"]:checked').id;
+    const tipoFiltro = selectorActivo === 'pos-entrada' ? 'entrada' : 
+                       selectorActivo === 'pos-salida' ? 'salida' : 'ambos';
+    // Filtramos por el tipo (Entrada/Salida/Ambos)
+    let resultados = todosLosDocumentos.filter(doc => {
+        if (tipoFiltro === 'ambos') return true;
+        return doc.tipoDocumento.toLowerCase() === tipoFiltro;
+    });
+
+    //Luego filtramos por lo que el usuario escribió
+    resultados = resultados.filter(doc => {
+        if (criterio === 'numero') {
+            return doc.noDocumento.toString().includes(textoBusqueda);
+        } else {
+            const entidad = (doc.tipoDocumento === 'Entrada' ? doc.proveedor : doc.destino) || "";
+            const concepto = doc.concepto || "";
+            return entidad.toLowerCase().includes(textoBusqueda) || 
+                   concepto.toLowerCase().includes(textoBusqueda);
+        }
+    });
+    //Pintamos solo los resultados
+    pintarBloquesFiltrados(resultados);
+}
+// Función auxiliar para no repetir código, es la que se utiliza para cuando queremos ahora si poner los bloques de nuevo
+function pintarBloquesFiltrados(lista) {
+    const contenedor = document.getElementById('contenedor-bloques');
+    contenedor.innerHTML = '';
+    if (lista.length === 0) {
+        contenedor.innerHTML = '<p class="text-center w-100 text-muted">No se encontraron documentos...</p>';
+        return;
+    }
+    lista.forEach(doc => {
+        const color = doc.tipoDocumento === 'Entrada' ? '#28a745' : '#dc3545';
+        const entidad = doc.tipoDocumento === 'Entrada' ? doc.proveedor : doc.destino;
+        contenedor.innerHTML += `
+            <div class="card-documento" onclick="verDetallePdf(${doc.idDocumento})">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span style="color: ${color}; font-weight: 800; font-size: 11px; letter-spacing: 1px; text-transform: uppercase;">
+                        ${doc.tipoDocumento}
+                    </span>
+                    <span class="text-muted small fw-bold">#${doc.noDocumento}</span>
+                </div>
+                <h5>${entidad || 'Sin registro'}</h5>
+                <p class="concepto-txt">${doc.concepto}</p>
+                <div class="footer-card">
+                    <span class="small text-secondary">${new Date(doc.fecha).toLocaleDateString()}</span>
+                    <div style="background: #f8f9fa; padding: 5px 10px; border-radius: 4px;">
+                         <i class="bi bi-file-earmark-pdf text-danger"></i>
+                         <span class="ms-1 small fw-bold" style="font-size: 10px;">PDF</span>
+                    </div>
+                </div>
+                <div style="height: 3px; background: ${color}; width: 100%; position: absolute; bottom: 0; left: 0;"></div>
+            </div>
+        `;
+    });
+}
+
+let ordenActual = 'reciente';
+function cambiarOrden(criterio, elemento) {
+    ordenActual = criterio;
+
+    // Manejar aspecto visual de los botones
+    document.querySelectorAll('.btn-orden').forEach(btn => btn.classList.remove('active'));
+    elemento.classList.add('active');
+    // Aplicar la lógica de ordenamiento a la lista global
+    todosLosDocumentos.sort((a, b) => {
+        if (criterio === 'reciente') {
+            return new Date(b.fecha) - new Date(a.fecha);
+        } else if (criterio === 'id') {
+            return a.noDocumento - b.noDocumento;
+        } else if (criterio === 'alfabetico') {
+            const entidadA = (a.tipoDocumento === 'Entrada' ? a.proveedor : a.destino) || "";
+            const entidadB = (b.tipoDocumento === 'Entrada' ? b.proveedor : b.destino) || "";
+            return entidadA.localeCompare(entidadB);
+        }
+    });
+    //Volver a mostrar los bloques con el filtro actual del selector principal utilizando la funcion anterior
+    const filtroActivo = document.querySelector('input[name="posicion"]:checked').id;
+    const tipoMap = { 'pos-entrada': 'entrada', 'pos-medio': 'ambos', 'pos-salida': 'salida' };
+    mostrarBloques(tipoMap[filtroActivo]);
+}
+//para cuando damos en el boton de regresar en ver el preview del documento
+function regresarALista() {
+    document.getElementById('pdf-view-page').style.display = 'none';
+    document.getElementById('documents-page').style.display = 'block';
+}
+
+
+
